@@ -47,7 +47,8 @@ else:
 to_update = [ ]
 for star in stars:
     fullname = star['full_name']
-    if lastseen.has_key(fullname) and star['pushed_at'] != lastseen[fullname]:
+    if (not lastseen.has_key(fullname)) or \
+       star['pushed_at'] != lastseen[fullname]:
         to_update.append(star)
 
 updated = 0
