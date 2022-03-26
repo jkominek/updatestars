@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import requests
 import json
@@ -35,7 +35,7 @@ else:
 
     links = parselink(r.headers['link'])
 
-    while links.has_key('next'):
+    while 'next' in links:
         r = requests.get(links['next'],
                          headers={'User-Agent': username})
         stars += r.json()
@@ -47,7 +47,7 @@ else:
 to_update = [ ]
 for star in stars:
     fullname = star['full_name']
-    if (not lastseen.has_key(fullname)) or \
+    if (fullname not in lastseen) or \
        star['pushed_at'] != lastseen[fullname]:
         to_update.append(star)
 
@@ -57,7 +57,7 @@ for i, star in zip(range(0, 1000), to_update):
         time.sleep(60)
 
     fullname = star['full_name']
-    print fullname, star['pushed_at']
+    print(fullname, star['pushed_at'])
     updated += 1
     user, proj = fullname.split('/')
     if not os.access(user, os.R_OK):
@@ -65,13 +65,13 @@ for i, star in zip(range(0, 1000), to_update):
     if os.access(fullname, os.R_OK):
         os.chdir(fullname)
         cmd = ["git", "fetch", "-p", "--all"]
-        subprocess.check_call(cmd)
+        subprocess.check_output(cmd, stderr=subprocess.PIPE)
         os.chdir("../..")
     else:
         cmd = ["git", "clone", "--mirror", star['git_url'], fullname]
-        subprocess.check_call(cmd)
+        subprocess.check_output(cmd, stderr=subprocess.PIPE)
     lastseen[fullname] = star['pushed_at']
     dumplastseen()
 
 if updated>0:
-    print "updated:", updated
+    print("updated:", updated)
