@@ -7,6 +7,7 @@ import sys
 import time
 import os
 import subprocess
+import datetime
 
 username = 'jkominek'
 testing = True
@@ -51,6 +52,7 @@ for star in stars:
        star['pushed_at'] != lastseen[fullname]:
         to_update.append(star)
 
+start_time = datetime.datetime.now()
 updated = 0
 for i, star in zip(range(0, 1000), to_update):
     if i>0:
@@ -68,10 +70,12 @@ for i, star in zip(range(0, 1000), to_update):
         subprocess.check_output(cmd, stderr=subprocess.PIPE)
         os.chdir("../..")
     else:
-        cmd = ["git", "clone", "--mirror", star['git_url'], fullname]
+        git_url = star['git_url'].replace("git://", "https://")
+        cmd = ["git", "clone", "--mirror", git_url, fullname]
         subprocess.check_output(cmd, stderr=subprocess.PIPE)
     lastseen[fullname] = star['pushed_at']
     dumplastseen()
 
 if updated>0:
     print("updated:", updated)
+    print("update took", (datetime.datetime.now() - start_time))
