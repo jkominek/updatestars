@@ -34,11 +34,18 @@ else:
                      headers={'User-Agent': username})
     stars = r.json()
 
+    if int(r.headers['X-RateLimit-Remaining']) <= 0:
+        print(f"rate limited until {datetime.datetime.fromtimestamp(float(r.headers['X-RateLimit-Reset']))}")
+        sys.exit(0)
+
     links = parselink(r.headers['link'])
 
     while 'next' in links:
         r = requests.get(links['next'],
                          headers={'User-Agent': username})
+        if int(r.headers['X-RateLimit-Remaining']) <= 0:
+            print(f"rate limited until {datetime.datetime.fromtimestamp(float(r.headers['X-RateLimit-Reset']))}")
+            sys.exit(0)
         stars += r.json()
         links = parselink(r.headers['link'])
         time.sleep(1.5)
@@ -56,7 +63,7 @@ start_time = datetime.datetime.now()
 updated = 0
 for i, star in zip(range(0, 1000), to_update):
     if i>0:
-        time.sleep(60)
+        time.sleep(20)
 
     fullname = star['full_name']
     print(fullname, star['pushed_at'])
